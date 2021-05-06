@@ -1,0 +1,16 @@
+package models
+
+data class Player(val id: Int, val cards: List<PlayerCard> = listOf()) {
+
+    fun plusCard(playerCard: PlayerCard): Player {
+        return copy(cards = cards + playerCard.assignedToPlayer(id))
+    }
+
+    fun lessCard(playerCard: PlayerCard): Player {
+        return copy(cards = cards.filter { it != playerCard })
+    }
+
+    fun withCards(cards: List<PlayerCard>): Player {
+        return copy(cards = cards)
+    }
+}

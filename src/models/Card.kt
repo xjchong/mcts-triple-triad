@@ -1,11 +1,8 @@
 package models
 
-import java.util.*
-
-data class Card(val name: String, val rarity: CardRarity,
+class Card private constructor(val name: String, val rarity: CardRarity,
                 val w: Int, val n: Int, val s: Int, val e: Int,
                 val type: CardType? = null) {
-    val uuid: UUID = UUID.randomUUID()
 
     companion object {
         val Bomb = Card("Bomb", Common, 4, 3, 3, 3)
