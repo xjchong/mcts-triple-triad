@@ -3,7 +3,7 @@ package models
 class Board private constructor(val playerCards: Map<Position, PlayerCard?>) {
 
     fun setCard(playerCard: PlayerCard, position: Position): Board? {
-        if (!playerCards.containsKey(position)) return null // Card doesn't exist at that position.
+        if (!playerCards.containsKey(position)) return null // Position doesn't exist.
 
         return Board(playerCards.mapValues { (position, currentPlayerCard) ->
             if (position == position) playerCard else currentPlayerCard
