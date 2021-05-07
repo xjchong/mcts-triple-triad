@@ -29,7 +29,7 @@ class BoardConsoleView(private var board: Board): ConsoleLayout(HEIGHT, WIDTH) {
     }
 
     inner class BoardFrameConsoleView(): ConsoleView(HEIGHT, WIDTH) {
-        override fun getBitString(): String {
+        override fun getString(): String {
             return BOARD_STRING
         }
     }

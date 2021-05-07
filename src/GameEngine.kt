@@ -41,8 +41,7 @@ class GameEngine() {
         requireCardPlayable(currentState, player, playerCard, position)
 
         // Place the card on the board.
-        val nextBoard = currentState.board.setCard(playerCard, position) ?:
-            throw IllegalStateException("Board didn't allow placement.")
+        val nextBoard = placeCard(playerCard, position, currentState.board, currentState.advancedRules)
 
         // Remove the card from the player.
         val playerAfterMove = player.lessCard(playerCard)
@@ -55,6 +54,13 @@ class GameEngine() {
         states = states + nextState
 
         return nextState
+    }
+
+    @Throws(IllegalStateException::class)
+    private fun placeCard(playerCard: PlayerCard, position:Position, board: Board,
+                          advancedRules: List<AdvancedRule>): Board {
+        return board.setCard(playerCard, position) ?:
+            throw IllegalStateException("Board didn't allow placement.")
     }
 
     @Throws(IllegalStateException::class)

@@ -1,31 +1,36 @@
 package views
 
 import models.Position
-import views.colors.ANSIColor
-import views.colors.color
 
 open class ConsoleLayout(height: Int, width: Int): ConsoleView(height, width) {
 
-    inner class Tile(var bit: Char = ' ', var backgroundColor: ANSIColor? = null) {
-        val output: String
-            get() = {
-                backgroundColor?.let { bit.color(it) } ?: bit.toString()
-            }()
-    }
-
     private val views: MutableList<ConsoleView> = mutableListOf()
-    private val viewPositions: MutableMap<ConsoleView, Position?> = mutableMapOf()
+    private val viewPositions: MutableMap<ConsoleView, Position> = mutableMapOf()
+    private var tileGrid: Array<Array<Tile?>> = clearTileGrid()
 
-    private var tileGrid: Array<Array<Tile>> = clearTileGrid()
-
-    final override fun getBitString(): String {
-        return tileGrid.flatten().map { it.bit }.joinToString(separator = "")
+    final override fun getString(): String {
+        return tileGrid.flatten().map { it?.char ?: transparentChar }.joinToString(separator = "")
     }
 
-    fun add(view: ConsoleView, position: Position?) {
-        view.position = position
+    final override fun getTileMap(): Map<Position, Tile?> {
+        layoutViews()
+
+        val tileMap = mutableMapOf<Position, Tile?>()
+
+        for ((row, tileRow) in tileGrid.withIndex()) {
+            for ((column, tile) in tileRow.withIndex()) {
+                if (tile == null) continue
+
+                tileMap[Position(row, column)] = tile
+            }
+        }
+
+        return tileMap
+    }
+
+    fun add(view: ConsoleView, position: Position) {
         views.add(view)
-        viewPositions[view] = view.position
+        viewPositions[view] = position
     }
 
     fun remove(view: ConsoleView) {
@@ -44,7 +49,7 @@ open class ConsoleLayout(height: Int, width: Int): ConsoleView(height, width) {
 
         for (row in (0 until height)) {
             for (column in (0 until width)) {
-                print(tileGrid[row][column].output)
+                print(tileGrid[row][column]?.output ?: transparentChar)
             }
             println()
         }
@@ -57,31 +62,28 @@ open class ConsoleLayout(height: Int, width: Int): ConsoleView(height, width) {
 
     private fun layoutView(view: ConsoleView) {
         val (originRow, originColumn) = viewPositions[view] ?: return
-        // Recursively layout children before getting the bitmap of the parent.
-        if (view is ConsoleLayout) {
-            view.layoutViews()
-        }
-        val bitMap = view.getBitMap()
-        val backgroundColor = view.backgroundColor
+        val tileMap = view.getTileMap()
 
         for (row in (0 until view.height)) {
             for (column in (0 until view.width)) {
                 val actualRow = row + originRow
                 val actualColumn = column + originColumn
-                val bit = bitMap[Position(row, column)] ?: continue
+                val tile = tileMap[Position(row, column)] ?: continue
 
                 if (actualRow > height || actualColumn > width) break
 
-                tileGrid[actualRow][actualColumn].run {
-                    this.bit = bit
-                    this.backgroundColor = backgroundColor
-                }
+                tileGrid[actualRow][actualColumn]?.run {
+                    this.char = tile.char
+                    this.backgroundColor = tile.backgroundColor
+                } ?: {
+                    tileGrid[actualRow][actualColumn] = Tile(tile.char, tile.backgroundColor)
+                }()
             }
         }
     }
 
-    private fun clearTileGrid(): Array<Array<Tile>> {
-        tileGrid = Array(height) { Array(width) { Tile() } }
+    private fun clearTileGrid(): Array<Array<Tile?>> {
+        tileGrid = Array(height) { Array<Tile?>(width) { null } }
 
         return tileGrid
     }

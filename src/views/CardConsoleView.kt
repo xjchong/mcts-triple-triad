@@ -4,7 +4,7 @@ import models.*
 import views.colors.ANSIColor
 
 class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(HEIGHT, WIDTH) {
-    override val transparentBit: Char = '#'
+    override val transparentChar: Char = '#'
     override val backgroundColor: ANSIColor?
         get() = {
             when (playerCard?.playerId) {
@@ -14,7 +14,7 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
             }
         }()
 
-    override fun getBitString(): String {
+    override fun getString(): String {
         val card = playerCard?.card
 
         return if (card == null) {
