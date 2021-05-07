@@ -18,7 +18,7 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
         val card = playerCard?.card
 
         return if (card == null) {
-            "".padEnd(height * width)
+            "".padEnd(height * width, transparentChar)
         } else {
             "._______." +
             "|${stars(card)} ${type(card)}|" +
