@@ -13,7 +13,9 @@ class GameConsoleView(private val initialGameState: GameState): ConsoleLayout(32
     init {
         add(boardConsoleView, Position(0, 31))
 
-        playerHandViews = initialGameState.players.map {
+        playerHandViews = initialGameState.players.sortedBy {
+            it.id
+        }.map {
             HandConsoleView(it)
         }
 
@@ -32,8 +34,11 @@ class GameConsoleView(private val initialGameState: GameState): ConsoleLayout(32
         boardConsoleView.bind(gameState.board)
 
         // Bind the player hands.
-        for ((index, player) in gameState.players.withIndex()) {
-            playerHandViews.getOrNull(index)?.bind(player)
+        for (player in gameState.players) {
+            when(player.id) {
+                0 -> playerHandViews.getOrNull(0)?.bind(player)
+                1 -> playerHandViews.getOrNull(1)?.bind(player)
+            }
         }
     }
 
