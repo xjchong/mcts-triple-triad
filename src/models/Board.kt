@@ -2,11 +2,11 @@ package models
 
 class Board private constructor(val rows: Int, val columns: Int, val playerCards: Map<Position, PlayerCard?> = mapOf()) {
 
-    fun setCard(playerCard: PlayerCard, position: Position): Board? {
-        if (!playerCards.containsKey(position)) return null // Position doesn't exist.
+    fun setCard(playerCard: PlayerCard, requestedPosition: Position): Board? {
+        if (!playerCards.containsKey(requestedPosition)) return null // Position doesn't exist.
 
         return Board(rows, columns, playerCards.mapValues { (position, currentPlayerCard) ->
-            if (position == position) playerCard else currentPlayerCard
+            if (position == requestedPosition) playerCard else currentPlayerCard
         })
     }
 

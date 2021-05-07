@@ -24,6 +24,8 @@ class GameEngine() {
             initialGameState = setupChaos(initialGameState)
         } else if (advancedRules.contains(Order)) {
             initialGameState = setupOrder(initialGameState)
+        } else {
+            initialGameState = setupFreePlay(initialGameState)
         }
 
         states = listOf(initialGameState)
@@ -31,14 +33,16 @@ class GameEngine() {
         return initialGameState
     }
 
-    fun makeMove(player: Player, playerCard: PlayerCard, position: Position): GameState? {
-        val currentState = states.lastOrNull() ?: return null // Need to initialize the engine.
+    @Throws(IllegalStateException::class)
+    fun makeMove(player: Player, playerCard: PlayerCard, position: Position): GameState {
+        val currentState = states.lastOrNull() ?:
+            throw IllegalStateException("Need to initialize engine.")
 
-        // Check if the card is playable.
-        if (!isCardPlayable(currentState, player, playerCard, position)) return null
+        requireCardPlayable(currentState, player, playerCard, position)
 
         // Place the card on the board.
-        val nextBoard = currentState.board.setCard(playerCard, position) ?: return null // Couldn't resolve the board for some reason after placing.
+        val nextBoard = currentState.board.setCard(playerCard, position) ?:
+            throw IllegalStateException("Board didn't allow placement.")
 
         // Remove the card from the player.
         val playerAfterMove = player.lessCard(playerCard)
@@ -53,24 +57,24 @@ class GameEngine() {
         return nextState
     }
 
-    private fun isCardPlayable(currentState: GameState, player: Player, playerCard: PlayerCard,
-                               position: Position): Boolean {
-        if (currentState.nextPlayer() != player) return false // It is not this player's turn.
+    @Throws(IllegalStateException::class)
+    private fun requireCardPlayable(currentState: GameState, player: Player, playerCard: PlayerCard,
+                                    position: Position) {
+        if (currentState.nextPlayer() != player)
+            throw IllegalStateException("Card not playable due to not being this player's turn.")
 
-        // Check if the player actually owns the card.
-        if (!player.cards.contains(playerCard)) return false
+        if (!player.cards.contains(playerCard))
+            throw IllegalStateException("Card not playable due to the player not owning that card.")
 
-        // Check that the card is playable given its turn restrictions.
         val currentTurn = currentState.getTurn()
-        if (!playerCard.playableTurns.contains(currentTurn)) return false
+        if (!playerCard.playableTurns.contains(currentTurn))
+            throw IllegalStateException("Card not playable (${playerCard.playableTurns}) on this turn ($currentTurn)")
 
-        // Check that the position exists on the board.
-        if (!currentState.board.playerCards.containsKey(position)) return false
+        if (!currentState.board.playerCards.containsKey(position))
+            throw IllegalStateException("Card can't be played to a position that doesn't exist.")
 
-        // Check that the position is empty on the board.
-        if (currentState.board.playerCards[position] != null) return false
-
-        return true
+        if (currentState.board.playerCards[position] != null)
+            throw IllegalStateException("Card can't be played to a position that is occupied.")
     }
 
     private fun setupAllOpen(gameState: GameState): GameState {
@@ -89,7 +93,13 @@ class GameEngine() {
         return gameState
     }
 
+    private fun setupFreePlay(gameState: GameState): GameState {
+        return gameState
+    }
+
     private fun setupSwap(gameState: GameState): GameState {
         return gameState
     }
+
+    inner class IllegalStateException(message: String) : Exception(message)
 }

@@ -5,13 +5,14 @@ import views.colors.ANSIColor
 
 class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(HEIGHT, WIDTH) {
     override val transparentBit: Char = '#'
-    override var backgroundColor: ANSIColor? = {
-        when (playerCard?.playerId) {
-            0 -> ANSIColor.BG_MAGENTA
-            1 -> ANSIColor.BG_RED
-            else -> null
-        }
-    }()
+    override val backgroundColor: ANSIColor?
+        get() = {
+            when (playerCard?.playerId) {
+                0 -> ANSIColor.BG_MAGENTA
+                1 -> ANSIColor.BG_RED
+                else -> null
+            }
+        }()
 
     override fun getBitString(): String {
         val card = playerCard?.card

@@ -3,7 +3,7 @@ package models
 data class Player(val id: Int, val cards: List<PlayerCard> = listOf()) {
 
     constructor(id: Int, cards: Set<Card>): this(
-        id, cards.map { PlayerCard(it, id, listOf()) }
+        id, cards.map { PlayerCard(it, id) }
     )
 
     fun plusCard(playerCard: PlayerCard): Player {

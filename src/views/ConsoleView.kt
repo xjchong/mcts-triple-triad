@@ -7,7 +7,7 @@ import views.colors.ANSIColor
 open class ConsoleView(var height: Int, var width: Int) {
     open val transparentBit: Char = ' '
     open var position: Position? = null
-    open var backgroundColor: ANSIColor? = null
+    open val backgroundColor: ANSIColor? = null
 
     protected open fun getBitString(): String {
         return ""
