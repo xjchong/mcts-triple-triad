@@ -2,6 +2,10 @@ package models
 
 data class Player(val id: Int, val cards: List<PlayerCard> = listOf()) {
 
+    constructor(id: Int, cards: Set<Card>): this(
+        id, cards.map { PlayerCard(it, id, listOf()) }
+    )
+
     fun plusCard(playerCard: PlayerCard): Player {
         return copy(cards = cards + playerCard.assignedToPlayer(id))
     }

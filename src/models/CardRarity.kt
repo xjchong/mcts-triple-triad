@@ -1,6 +1,6 @@
 package models
 
-sealed class CardRarity(value: Int)
+sealed class CardRarity(val value: Int)
 object Common : CardRarity(1)
 object Uncommon : CardRarity(2)
 object Rare : CardRarity(3)

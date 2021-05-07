@@ -30,4 +30,7 @@ data class Position(val row: Int, val column: Int) {
         return copy(column = column + delta)
     }
 
+    fun withRelative(row: Int, column: Int): Position {
+        return copy(row = this.row + row, column = this.column + column)
+    }
 }

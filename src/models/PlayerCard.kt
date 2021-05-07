@@ -2,8 +2,8 @@ package models
 
 import java.util.*
 
-data class PlayerCard(val card: Card, val playerId: Int, val playableTurns: List<Int>, val isHidden: Boolean = false,
-                      val id: UUID = UUID.randomUUID()) {
+data class PlayerCard(val card: Card, val playerId: Int, val playableTurns: List<Int>, val isHidden: Boolean = true,
+                      val modifier: Int = 0, val id: UUID = UUID.randomUUID()) {
 
     fun assignedToPlayer(playerId: Int): PlayerCard {
         return copy(playerId = playerId)
@@ -19,5 +19,9 @@ data class PlayerCard(val card: Card, val playerId: Int, val playableTurns: List
 
     fun playableOnTurns(playableTurns: List<Int>): PlayerCard {
         return copy(playableTurns = playableTurns)
+    }
+
+    fun modified(modifier: Int): PlayerCard {
+        return copy(modifier = modifier)
     }
 }
