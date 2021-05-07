@@ -33,4 +33,8 @@ data class Position(val row: Int, val column: Int) {
     fun withRelative(row: Int, column: Int): Position {
         return copy(row = this.row + row, column = this.column + column)
     }
+
+    companion object {
+        val ORIGIN = Position(0, 0)
+    }
 }

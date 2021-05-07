@@ -4,7 +4,7 @@ import models.Position
 import views.colors.ANSIColor
 import views.colors.color
 
-open class ConsoleLayout(height: Int, width: Int):  ConsoleView(height, width) {
+open class ConsoleLayout(height: Int, width: Int): ConsoleView(height, width) {
 
     inner class Tile(var bit: Char = ' ', var backgroundColor: ANSIColor? = null) {
         val output: String
@@ -19,7 +19,7 @@ open class ConsoleLayout(height: Int, width: Int):  ConsoleView(height, width) {
     private var tileGrid: Array<Array<Tile>> = clearTileGrid()
 
     final override fun getBitString(): String {
-        return tileGrid.flatten().map { it.bit }.toString()
+        return tileGrid.flatten().map { it.bit }.joinToString(separator = "")
     }
 
     fun add(view: ConsoleView, position: Position?) {
@@ -57,6 +57,10 @@ open class ConsoleLayout(height: Int, width: Int):  ConsoleView(height, width) {
 
     private fun layoutView(view: ConsoleView) {
         val (originRow, originColumn) = viewPositions[view] ?: return
+        // Recursively layout children before getting the bitmap of the parent.
+        if (view is ConsoleLayout) {
+            view.layoutViews()
+        }
         val bitMap = view.getBitMap()
         val backgroundColor = view.backgroundColor
 

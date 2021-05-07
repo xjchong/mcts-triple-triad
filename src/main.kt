@@ -1,6 +1,6 @@
 import models.Card
 import models.Player
-import views.GameConsoleLayout
+import views.GameConsoleView
 
 fun main() {
     val players = listOf(
@@ -10,7 +10,7 @@ fun main() {
 
     val gameEngine = GameEngine()
     val initialState = gameEngine.initialize(players)
-    val gameConsoleView = GameConsoleLayout(initialState)
+    val gameConsoleView = GameConsoleView(initialState)
 
     gameConsoleView.bind(initialState)
     gameConsoleView.draw()
