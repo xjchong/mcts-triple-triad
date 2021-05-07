@@ -1,20 +1,37 @@
 package views
 
 import models.*
+import views.colors.ANSIColor
 
-class CardConsoleView(playerCard: PlayerCard): ConsoleView(HEIGHT, WIDTH) {
-
-    override var bitString: String = {
-        val card = playerCard.card
-
-        "._______." +
-        "|${stars(card)} ${type(card)}|" +
-        "| ${card.name.take(5).padEnd(5)} |"  +
-        "|       |" +
-        "|   ${card.n}   |" +
-        "|  ${card.w} ${card.e}  |" +
-        "|___${card.s}___|"
+class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(HEIGHT, WIDTH) {
+    override val transparentBit: Char = '#'
+    override var backgroundColor: ANSIColor? = {
+        when (playerCard?.playerId) {
+            0 -> ANSIColor.BG_MAGENTA
+            1 -> ANSIColor.BG_RED
+            else -> null
+        }
     }()
+
+    override fun getBitString(): String {
+        val card = playerCard?.card
+
+        return if (card == null) {
+            "".padEnd(height * width)
+        } else {
+            "._______." +
+            "|${stars(card)} ${type(card)}|" +
+            "| ${card.name.take(5).padEnd(5)} |"  +
+            "|       |" +
+            "|   ${card.n}   |" +
+            "|  ${card.w} ${card.e}  |" +
+            "|___${card.s}___|"
+        }
+    }
+
+    fun bind(playerCard: PlayerCard?) {
+        this.playerCard = playerCard
+    }
 
     private fun stars(card: Card): String {
         val rarity = card.rarity.value

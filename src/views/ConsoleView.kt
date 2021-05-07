@@ -1,17 +1,22 @@
 package views
 
 import models.Position
+import views.colors.ANSIColor
 
 
 open class ConsoleView(var height: Int, var width: Int) {
-    open val transparentBit = ' '
-    open val opaqueBit: Char = '#'
-    open var bitString: String = ""
+    open val transparentBit: Char = ' '
     open var position: Position? = null
+    open var backgroundColor: ANSIColor? = null
 
-    fun getBitMap(): Map<Position, Char> {
-        val bitMap = mutableMapOf<Position, Char>()
-        val bitArray = bitString.toCharArray()
+    protected open fun getBitString(): String {
+        return ""
+    }
+
+    fun getBitMap(): Map<Position, Char?> {
+        val bitMap = mutableMapOf<Position, Char?>()
+        val maxLength = height * width
+        val bitArray = getBitString().take(maxLength).padEnd(maxLength, transparentBit).toCharArray()
 
         for (row in (0 until height)) {
             for (column in (0 until width)) {
@@ -19,7 +24,7 @@ open class ConsoleView(var height: Int, var width: Int) {
 
                 if (bit == transparentBit) continue
 
-                bitMap[Position(row, column)] = if (bit == opaqueBit) transparentBit else bit
+                bitMap[Position(row, column)] = if (bit == transparentBit) null else bit
             }
         }
 

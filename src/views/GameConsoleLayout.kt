@@ -1,7 +1,6 @@
 package views
 
 import models.GameState
-import models.Player
 import models.Position
 
 class GameConsoleLayout(private val initialGameState: GameState): ConsoleLayout(32, 96) {
@@ -33,35 +32,14 @@ class GameConsoleLayout(private val initialGameState: GameState): ConsoleLayout(
             }
         }
 
+        add(BoardConsoleView(), Position(0, 31))
+
         // Layout board.
         // TODO
     }
 
-    fun print(perspectivePlayer: Player) {
-        for (player in currentGameState.players) {
-            println("Player ${player.id}")
-            for (card in player.cards) {
-                if (card.playerId != perspectivePlayer.id && card.isHidden) {
-                    println("Hidden")
-                } else {
-                    println(card)
-                }
-            }
-            println()
-        }
-
-        val board = currentGameState.board
-
-        for (row in (0 until board.rows)) {
-            for (column in (0 until board.columns)) {
-                print(board.playerCards[Position(row, column)])
-            }
-            println()
-        }
-    }
-
     companion object {
-        val HAND_L_POS = Position(8, 0)
-        val HAND_R_POS = Position(8, 64)
+        val HAND_L_POS = Position(5, 0)
+        val HAND_R_POS = Position(5, 64)
     }
 }

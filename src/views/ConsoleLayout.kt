@@ -1,15 +1,26 @@
 package views
 
 import models.Position
+import views.colors.ANSIColor
+import views.colors.color
 
-open class ConsoleLayout(val height: Int, val width: Int) {
+open class ConsoleLayout(height: Int, width: Int):  ConsoleView(height, width) {
 
-    inner class Tile(var bit: Char = ' ')
+    inner class Tile(var bit: Char = ' ', var backgroundColor: ANSIColor? = null) {
+        val output: String
+            get() = {
+                backgroundColor?.let { bit.color(it) } ?: bit.toString()
+            }()
+    }
 
     private val views: MutableList<ConsoleView> = mutableListOf()
     private val viewPositions: MutableMap<ConsoleView, Position?> = mutableMapOf()
 
     private var tileGrid: Array<Array<Tile>> = clearTileGrid()
+
+    final override fun getBitString(): String {
+        return tileGrid.flatten().map { it.bit }.toString()
+    }
 
     fun add(view: ConsoleView, position: Position?) {
         view.position = position
@@ -33,7 +44,7 @@ open class ConsoleLayout(val height: Int, val width: Int) {
 
         for (row in (0 until height)) {
             for (column in (0 until width)) {
-                print(tileGrid[row][column].bit)
+                print(tileGrid[row][column].output)
             }
             println()
         }
@@ -47,6 +58,7 @@ open class ConsoleLayout(val height: Int, val width: Int) {
     private fun layoutView(view: ConsoleView) {
         val (originRow, originColumn) = viewPositions[view] ?: return
         val bitMap = view.getBitMap()
+        val backgroundColor = view.backgroundColor
 
         for (row in (0 until view.height)) {
             for (column in (0 until view.width)) {
@@ -56,7 +68,10 @@ open class ConsoleLayout(val height: Int, val width: Int) {
 
                 if (actualRow > height || actualColumn > width) break
 
-                tileGrid[actualRow][actualColumn].bit = bit
+                tileGrid[actualRow][actualColumn].run {
+                    this.bit = bit
+                    this.backgroundColor = backgroundColor
+                }
             }
         }
     }
