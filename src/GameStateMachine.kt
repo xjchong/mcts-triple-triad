@@ -296,11 +296,20 @@ class GameStateMachine {
     }
 
     private fun setupOrder(gameState: GameState): GameState {
-        return gameState
+        return gameState.copy(players = gameState.players.mapIndexed { playerIndex, player ->
+            player.withCards(player.cards.mapIndexed { cardIndex, playerCard ->
+                playerCard.playableOnTurns(listOf(playerIndex + cardIndex))
+            })
+        })
     }
 
     private fun setupChaos(gameState: GameState): GameState {
-        return gameState
+        return gameState.copy(players = gameState.players.mapIndexed { playerIndex, player ->
+            val playableTurnIndices = mutableListOf<Int>(0, 1, 2, 3, 4).shuffled()
+            player.withCards(player.cards.mapIndexed { cardIndex, playerCard ->
+                playerCard.playableOnTurns(listOf(playerIndex + playableTurnIndices[cardIndex]))
+            })
+        })
     }
 
     private fun setupFreePlay(gameState: GameState): GameState {
