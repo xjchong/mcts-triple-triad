@@ -15,18 +15,19 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
         }()
 
     override fun getString(): String {
+        val playerCard = this.playerCard
         val card = playerCard?.card
 
-        return if (card == null) {
+        return if (playerCard == null || card == null) {
             "".padEnd(height * width, transparentChar)
         } else {
             "._______." +
             "|${stars(card)} ${type(card)}|" +
             "| ${card.name.take(5).padEnd(5)} |"  +
             "|       |" +
-            "|   ${card.n}   |" +
-            "|  ${card.w} ${card.e}  |" +
-            "|___${card.s}___|"
+            "|   ${playerCard.n()}   |" +
+            "|  ${playerCard.w()} ${playerCard.e()}  |" +
+            "|___${playerCard.s()}___|"
         }
     }
 

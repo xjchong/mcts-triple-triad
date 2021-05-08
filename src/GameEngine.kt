@@ -185,6 +185,53 @@ class GameEngine() {
         return nextBoard
     }
 
+    private fun resolveAscension(gameState: GameState): GameState {
+        return resolveModifier(gameState, 1)
+    }
+
+    private fun resolveDescension(gameState: GameState): GameState {
+        return resolveModifier(gameState, -1)
+    }
+
+    private fun resolveModifier(gameState: GameState, modifierIncrement: Int): GameState {
+        val typeCount = mutableMapOf<CardType, Int>()
+
+        gameState.board.playerCards.values.filterNotNull().mapNotNull { it.card.type }.forEach { type ->
+           typeCount[type] = typeCount.getOrDefault(type, 0) + 1
+        }
+
+        var nextState = gameState
+        for ((type, count) in typeCount) {
+            nextState = resolveModifier(nextState, type, count * modifierIncrement)
+        }
+
+        return nextState
+    }
+
+    private fun resolveModifier(gameState: GameState, type: CardType, modifier: Int): GameState {
+        val nextPlayers = gameState.players.map { player ->
+            player.withCards(
+                player.cards.map { playerCard ->
+                    if (playerCard.card.type == type) {
+                        playerCard.modified(modifier)
+                    } else {
+                        playerCard
+                    }
+                }
+            )
+        }
+
+        var nextBoard = gameState.board
+
+        for ((position, playerCard) in gameState.board.playerCards) {
+            if (playerCard == null || playerCard.card.type != type) continue
+
+            nextBoard = nextBoard.setCard(playerCard.modified(modifier), position) ?: nextBoard
+        }
+
+        return GameState(nextBoard, nextPlayers, gameState.advancedRules)
+    }
+
     @Throws(IllegalStateException::class)
     private fun requireCardPlayable(currentState: GameState, player: Player, playerCard: PlayerCard,
                                     position: Position) {
