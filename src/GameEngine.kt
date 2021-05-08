@@ -1,12 +1,13 @@
 import models.*
 
-class GameEngine() {
+class GameEngine {
 
     var states: List<GameState> = listOf()
         private set
 
-    fun initialize(players: List<Player>, advancedRules: List<AdvancedRule> = listOf()): GameState {
-        val startingPlayers = players.shuffled()
+    fun initialize(players: List<Player>, advancedRules: List<AdvancedRule> = listOf(),
+                   shouldShufflePlayers: Boolean = true): GameState {
+        val startingPlayers = if (shouldShufflePlayers) players.shuffled() else players
         var initialGameState = GameState(Board.standardInstance(), startingPlayers, advancedRules)
 
         // Setup the advanced rules.
@@ -31,6 +32,17 @@ class GameEngine() {
         states = listOf(initialGameState)
 
         return initialGameState
+    }
+
+    @Throws(IllegalStateException::class)
+    fun makeMove(playerCardIndex: Int, position: Position): GameState {
+        val currentState = states.lastOrNull() ?:
+            throw IllegalStateException("Need to initialize engine.")
+
+        val playerCard = currentState.nextPlayer().cards.getOrNull(playerCardIndex) ?:
+            throw IllegalStateException("Couldn't get a card for player ${currentState.nextPlayer().id} with card index $playerCardIndex.")
+
+        return makeMove(playerCard, position)
     }
 
     @Throws(IllegalStateException::class)
@@ -65,6 +77,14 @@ class GameEngine() {
                           advancedRules: List<AdvancedRule>): Board {
         var nextBoard = board.setCard(playerCard, position) ?:
             throw IllegalStateException("Board didn't allow placement.")
+
+        for (advancedRule in advancedRules) {
+            nextBoard = when(advancedRule) {
+                Plus -> resolvePlacedCardPlus(nextBoard, position)
+                Same -> resolvePlacedCardSame(nextBoard, position)
+                else -> nextBoard
+            }
+        }
 
         nextBoard = resolvePlacedCardBasic(nextBoard, position)
 
@@ -130,6 +150,7 @@ class GameEngine() {
                 }
 
                 add(otherPosition)
+                valuesToPositions[value] = this
             }
         }
 
