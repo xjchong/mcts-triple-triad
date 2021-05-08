@@ -86,7 +86,14 @@ class GameStateMachine {
             }
         }
 
-        nextBoard = resolvePlacedCardBasic(nextBoard, position)
+        nextBoard = when {
+            advancedRules.contains(FallenAce) && advancedRules.contains(Reverse) -> {
+                resolvePlacedCardFallenAceReverse(nextBoard, position)
+            }
+            advancedRules.contains(Reverse) -> resolvePlacedCardReverse(nextBoard, position)
+            advancedRules.contains(FallenAce) -> resolvePlacedCardFallenAce(nextBoard, position)
+            else -> resolvePlacedCardBasic(nextBoard, position)
+        }
 
         return nextBoard
     }

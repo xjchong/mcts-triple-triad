@@ -1,6 +1,7 @@
+import tests.TestReversePlacement
 import tests.Testing
 
 
 fun main() {
-    Testing.unitTest()
+    Testing.execute(TestReversePlacement, true)
 }
