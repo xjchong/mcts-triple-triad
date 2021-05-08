@@ -1,4 +1,3 @@
-import extensions.second
 import models.*
 import views.GameConsoleView
 
@@ -26,11 +25,19 @@ object Testing {
         )
     }
 
-    fun testSetup() {
+    fun testThreeOpen() {
         test(
             Player(0, setOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender)),
             Player(1, setOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender)),
-            advancedRules = listOf(AllOpen)
+            advancedRules = listOf(ThreeOpen)
+        )
+    }
+
+    fun testAllOpen() {
+        test(
+            Player(0, setOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender)),
+            Player(1, setOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender)),
+            advancedRules = listOf(AllOpen, ThreeOpen)
         )
     }
 
@@ -50,15 +57,17 @@ object Testing {
 
     private fun test(startingPlayer: Player, followingPlayer: Player, vararg moves: Move,
                      advancedRules: List<AdvancedRule> = listOf()) {
-        val gameEngine = GameEngine().apply {
+        val gameStateMachine = GameStateMachine().apply {
             initialize(listOf(startingPlayer, followingPlayer), advancedRules = advancedRules, shouldShufflePlayers = false)
         }
 
-        val gameConsoleView = GameConsoleView(gameEngine.states.last())
+        val gameConsoleView = GameConsoleView(gameStateMachine.states.last()).also {
+            it.draw()
+        }
 
         moves.forEach { (cardIndex, position) ->
-            gameEngine.makeMove(cardIndex, position)
-            gameConsoleView.bind(gameEngine.states.last())
+            gameStateMachine.makeMove(cardIndex, position)
+            gameConsoleView.bind(gameStateMachine.states.last())
             gameConsoleView.draw()
         }
     }
@@ -66,5 +75,5 @@ object Testing {
 
 
 fun main() {
-    Testing.testSamePlacement()
+    Testing.testThreeOpen()
 }

@@ -1,6 +1,6 @@
 import models.*
 
-class GameEngine {
+class GameStateMachine {
 
     var states: List<GameState> = listOf()
         private set
@@ -75,7 +75,7 @@ class GameEngine {
     @Throws(IllegalStateException::class)
     private fun placeCard(playerCard: PlayerCard, position: Position, board: Board,
                           advancedRules: List<AdvancedRule>): Board {
-        var nextBoard = board.setCard(playerCard, position) ?:
+        var nextBoard = board.setCard(playerCard.unhidden(), position) ?:
             throw IllegalStateException("Board didn't allow placement.")
 
         for (advancedRule in advancedRules) {
@@ -278,11 +278,21 @@ class GameEngine {
     }
 
     private fun setupAllOpen(gameState: GameState): GameState {
-        return gameState
+        return gameState.copy(players = gameState.players.map { player ->
+            player.withCards(player.cards.map {
+                it.unhidden()
+            })
+        })
     }
 
     private fun setupThreeOpen(gameState: GameState): GameState {
-        return gameState
+        return gameState.copy(players = gameState.players.map { player ->
+            val indicesToOpen = listOf(0, 1, 2, 3, 4).shuffled().take(3)
+
+            player.withCards(player.cards.mapIndexed { index, playerCard ->
+                if (index in indicesToOpen) playerCard.unhidden() else playerCard.hidden()
+            })
+        })
     }
 
     private fun setupOrder(gameState: GameState): GameState {
@@ -294,7 +304,11 @@ class GameEngine {
     }
 
     private fun setupFreePlay(gameState: GameState): GameState {
-        return gameState
+        return gameState.copy(players = gameState.players.map { player ->
+            player.withCards(player.cards.map { it.playableOnTurns(listOf(
+                0, 1, 2, 3, 4, 5, 6, 7, 8
+            ))})
+        })
     }
 
     private fun setupSwap(gameState: GameState): GameState {

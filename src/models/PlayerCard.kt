@@ -2,8 +2,9 @@ package models
 
 import java.util.*
 
-data class PlayerCard(val card: Card, val playerId: Int, val playableTurns: List<Int> = listOf(0, 1, 2, 3, 4, 5, 6, 7, 8), val isHidden: Boolean = true,
-                      val modifier: Int = 0, val id: UUID = UUID.randomUUID()) {
+data class PlayerCard(val card: Card, val playerId: Int,
+                      val playableTurns: List<Int> = listOf(),
+                      val isHidden: Boolean = true, val modifier: Int = 0, val id: UUID = UUID.randomUUID()) {
 
     fun assignedToPlayer(playerId: Int): PlayerCard {
         return copy(playerId = playerId)

@@ -23,7 +23,7 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
         } else {
             "._______." +
             "|${stars(card)} ${type(card)}|" +
-            "| ${card.name.take(5).padEnd(5)} |"  +
+            "|${if (playerCard.isHidden) "(" else " "}${card.name.take(5).padEnd(5)}${if (playerCard.isHidden) ")" else " "}|"  +
             "|       |" +
             "|   ${playerCard.n()}   |" +
             "|  ${playerCard.w()} ${playerCard.e()}  |" +
