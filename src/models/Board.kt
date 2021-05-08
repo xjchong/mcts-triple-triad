@@ -10,6 +10,25 @@ class Board private constructor(val rows: Int, val columns: Int, val playerCards
         })
     }
 
+    fun flipped(position: Position, playerId: Int): Board {
+        val playerCard = playerCards[position] ?: return this
+
+        return setCard(playerCard.assignedToPlayer(playerId), position) ?: this
+    }
+
+    fun flippedIf(position: Position, otherPosition: Position,
+                          shouldFlip: (card: PlayerCard, otherCard: PlayerCard) -> Boolean): Board {
+        val playerCard = playerCards[position]
+        val otherPlayerCard = playerCards[otherPosition]
+
+        return if (playerCard != null && otherPlayerCard != null && playerCard.playerId != otherPlayerCard.playerId &&
+            shouldFlip(playerCard, otherPlayerCard)) {
+            setCard(otherPlayerCard.assignedToPlayer(playerCard.playerId), otherPosition) ?: this
+        } else {
+            this
+        }
+    }
+
     companion object {
         fun standardInstance(): Board {
             return Board(3, 3, mutableMapOf(

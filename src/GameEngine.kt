@@ -57,10 +57,132 @@ class GameEngine() {
     }
 
     @Throws(IllegalStateException::class)
-    private fun placeCard(playerCard: PlayerCard, position:Position, board: Board,
+    private fun placeCard(playerCard: PlayerCard, position: Position, board: Board,
                           advancedRules: List<AdvancedRule>): Board {
-        return board.setCard(playerCard, position) ?:
+        var nextBoard = board.setCard(playerCard, position) ?:
             throw IllegalStateException("Board didn't allow placement.")
+
+        nextBoard = resolvePlacedCardBasic(nextBoard, position)
+
+        return nextBoard
+    }
+
+    private fun resolvePlacedCardBasic(board: Board, position: Position): Board {
+        return resolvePlacedCardCompareWith(board, position) { placedValue, otherValue ->
+            placedValue > otherValue
+        }
+    }
+
+    private fun resolvePlacedCardReverse(board: Board, position: Position): Board {
+        return resolvePlacedCardCompareWith(board, position) { placedValue, otherValue ->
+            placedValue < otherValue
+        }
+    }
+
+    private fun resolvePlacedCardSame(board: Board, position: Position): Board {
+        val positionsOfSameCards = mutableListOf<Position>()
+        val placedCard = board.playerCards[position] ?: return board
+
+        board.playerCards[position.north()]?.run {
+            if (placedCard.n() == s()) {
+                positionsOfSameCards.add(position.north())
+            }
+        }
+        board.playerCards[position.east()]?.run {
+            if (placedCard.e() == w()) {
+                positionsOfSameCards.add(position.east())
+            }
+        }
+        board.playerCards[position.south()]?.run {
+            if (placedCard.s() == n()) {
+                positionsOfSameCards.add(position.south())
+            }
+        }
+        board.playerCards[position.west()]?.run {
+            if (placedCard.w() == e()) {
+                positionsOfSameCards.add(position.west())
+            }
+        }
+
+        return if (positionsOfSameCards.size >= 2) {
+            var nextBoard = board
+
+            for (positionOfSame in positionsOfSameCards) {
+                nextBoard = board.flipped(positionOfSame, placedCard.playerId)
+            }
+
+            nextBoard
+        } else board
+    }
+
+    private fun resolvePlacedCardPlus(board: Board, position: Position): Board {
+        val valuesToPositions = mutableMapOf<Int, MutableList<Position>>()
+        val plusSet = mutableSetOf<Int>()
+        val placedCard = board.playerCards[position] ?: return board
+        val updateSet: (Int, Position) -> Unit = { value, otherPosition ->
+            valuesToPositions.getOrDefault(value, mutableListOf()).run {
+                if (isNotEmpty()) {
+                    plusSet.add(value)
+                }
+
+                add(otherPosition)
+            }
+        }
+
+        board.playerCards[position.north()]?.run {
+            updateSet(placedCard.n() + s(), position.north())
+        }
+        board.playerCards[position.east()]?.run {
+            updateSet(placedCard.e() + w(), position.east())
+        }
+        board.playerCards[position.south()]?.run {
+            updateSet(placedCard.s() + n(), position.south())
+        }
+        board.playerCards[position.west()]?.run {
+            updateSet(placedCard.w() + e(), position.west())
+        }
+
+        return if (plusSet.isNotEmpty()) {
+            var nextBoard = board
+
+            plusSet.forEach {
+                valuesToPositions.getOrDefault(it, mutableListOf()).forEach { otherPosition ->
+                    nextBoard = nextBoard.flipped(otherPosition, placedCard.playerId)
+                }
+            }
+
+            nextBoard
+        } else board
+    }
+
+    private fun resolvePlacedCardFallenAce(board: Board, position: Position): Board {
+        return resolvePlacedCardCompareWith(board, position) { placedValue, otherValue ->
+            placedValue > otherValue || (placedValue == 1 && otherValue == 10)
+        }
+    }
+
+    private fun resolvePlacedCardFallenAceReverse(board: Board, position: Position): Board {
+        return resolvePlacedCardCompareWith(board, position) { placedValue, otherValue ->
+            placedValue < otherValue || (placedValue == 10 && otherValue == 1)
+        }
+    }
+
+    private fun resolvePlacedCardCompareWith(board: Board, position: Position,
+                                             compare: (placedValue: Int, otherValue: Int) -> Boolean): Board {
+        var nextBoard = board.flippedIf(position, position.north()) { placedCard, otherCard ->
+            compare(placedCard.n(), otherCard.s())
+        }
+        nextBoard = nextBoard.flippedIf(position, position.east()) { placedCard, otherCard ->
+            compare(placedCard.e(), otherCard.w())
+        }
+        nextBoard = nextBoard.flippedIf(position, position.south()) { placedCard, otherCard ->
+            compare(placedCard.s(), otherCard.n())
+        }
+        nextBoard = nextBoard.flippedIf(position, position.west()) { placedCard, otherCard ->
+            compare(placedCard.w(), otherCard.e())
+        }
+
+        return nextBoard
     }
 
     @Throws(IllegalStateException::class)
