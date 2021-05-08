@@ -2,7 +2,7 @@ package models
 
 data class Player(val id: Int, val cards: List<PlayerCard> = listOf()) {
 
-    constructor(id: Int, cards: Set<Card>): this(
+    constructor(id: Int, cards: Array<Card>): this (
         id, cards.map { PlayerCard(it, id) }
     )
 
