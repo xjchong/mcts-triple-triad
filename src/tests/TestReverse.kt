@@ -3,7 +3,7 @@ package tests
 import models.Card
 import models.Reverse
 
-object TestReversePlacement: Test(
+object TestReverse: Test(
     arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender),
     arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender),
     Move(2, TOP_RIGHT),

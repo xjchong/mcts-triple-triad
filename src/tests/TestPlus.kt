@@ -3,7 +3,7 @@ package tests
 import models.Card
 import models.Plus
 
-object TestPlusPlacement: Test(
+object TestPlus: Test(
     arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender),
     arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender),
     Move(0, CENTER),

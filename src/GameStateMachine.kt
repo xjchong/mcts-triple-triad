@@ -80,8 +80,8 @@ class GameStateMachine {
 
         for (advancedRule in advancedRules) {
             nextBoard = when(advancedRule) {
-                Plus -> resolvePlacedCardPlus(nextBoard, position)
-                Same -> resolvePlacedCardSame(nextBoard, position)
+                Plus -> resolvePlacedCardPlus(nextBoard, position, advancedRules)
+                Same -> resolvePlacedCardSame(nextBoard, position, advancedRules)
                 else -> nextBoard
             }
         }
@@ -110,7 +110,7 @@ class GameStateMachine {
         }
     }
 
-    private fun resolvePlacedCardSame(board: Board, position: Position): Board {
+    private fun resolvePlacedCardSame(board: Board, position: Position, advancedRules: List<AdvancedRule>): Board {
         val positionsOfSameCards = mutableListOf<Position>()
         val placedCard = board.playerCards[position] ?: return board
 
@@ -137,16 +137,21 @@ class GameStateMachine {
 
         return if (positionsOfSameCards.size >= 2) {
             var nextBoard = board
+            val comboPositions = mutableListOf<Position>()
 
             for (positionOfSame in positionsOfSameCards) {
+                if (board.playerCards[positionOfSame]?.playerId != placedCard.playerId) {
+                   comboPositions.add(positionOfSame)
+                }
+
                 nextBoard = board.flipped(positionOfSame, placedCard.playerId)
             }
 
-            nextBoard
+            resolveCombo(comboPositions, nextBoard, advancedRules)
         } else board
     }
 
-    private fun resolvePlacedCardPlus(board: Board, position: Position): Board {
+    private fun resolvePlacedCardPlus(board: Board, position: Position, advancedRules: List<AdvancedRule>): Board {
         val valuesToPositions = mutableMapOf<Int, MutableList<Position>>()
         val plusSet = mutableSetOf<Int>()
         val placedCard = board.playerCards[position] ?: return board
@@ -176,14 +181,19 @@ class GameStateMachine {
 
         return if (plusSet.isNotEmpty()) {
             var nextBoard = board
+            val comboPositions = mutableListOf<Position>()
 
             plusSet.forEach {
                 valuesToPositions.getOrDefault(it, mutableListOf()).forEach { otherPosition ->
+                    if (nextBoard.playerCards[otherPosition]?.playerId != placedCard.playerId) {
+                        comboPositions.add(otherPosition)
+                    }
+
                     nextBoard = nextBoard.flipped(otherPosition, placedCard.playerId)
                 }
             }
 
-            nextBoard
+            resolveCombo(comboPositions, nextBoard, advancedRules)
         } else board
     }
 
@@ -262,6 +272,30 @@ class GameStateMachine {
         }
 
         return GameState(nextBoard, nextPlayers, gameState.advancedRules)
+    }
+
+    private fun resolveCombo(positions: List<Position>, board: Board, advancedRules: List<AdvancedRule>): Board {
+        if (positions.isEmpty()) return board
+
+        var nextBoard = board
+
+        for (position in positions) {
+            nextBoard = when {
+                advancedRules.contains(FallenAce) && advancedRules.contains(Reverse) -> {
+                    resolvePlacedCardFallenAceReverse(nextBoard, position)
+                }
+                advancedRules.contains(Reverse) -> resolvePlacedCardReverse(nextBoard, position)
+                advancedRules.contains(FallenAce) -> resolvePlacedCardFallenAce(nextBoard, position)
+                else -> resolvePlacedCardBasic(nextBoard, position)
+            }
+        }
+
+        val newlyFlippedPositions = nextBoard.playerCards.filter { (nextPosition, nextCard) ->
+            nextCard != null &&
+                board.playerCards[nextPosition]?.playerId != nextCard.playerId
+        }.keys.toList()
+
+        return resolveCombo(newlyFlippedPositions, nextBoard, advancedRules)
     }
 
     @Throws(IllegalStateException::class)

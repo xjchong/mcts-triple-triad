@@ -35,7 +35,7 @@ object Testing {
         }
     }
 
-    fun unitTest() {
+    fun executeUnitTests() {
         unitTestSetup()
         unitTestPlacement()
     }
@@ -47,7 +47,9 @@ object Testing {
 
     private fun unitTestPlacement() {
         execute(TestBasicPlacement)
-        execute(TestSamePlacement)
-        execute(TestPlusPlacement)
+        execute(TestReverse)
+        execute(TestSame)
+        execute(TestPlus)
+        execute(TestPlusCombo)
     }
 }

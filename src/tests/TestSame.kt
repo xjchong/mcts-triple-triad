@@ -3,7 +3,7 @@ package tests
 import models.Card
 import models.Same
 
-object TestSamePlacement: Test(
+object TestSame: Test(
     arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender),
     arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender),
     Move(0, CENTER),
