@@ -34,9 +34,13 @@ class GameEngine() {
     }
 
     @Throws(IllegalStateException::class)
-    fun makeMove(player: Player, playerCard: PlayerCard, position: Position): GameState {
+    fun makeMove(playerCard: PlayerCard, position: Position): GameState {
         val currentState = states.lastOrNull() ?:
             throw IllegalStateException("Need to initialize engine.")
+
+        val player = currentState.players.find { player ->
+            player.cards.any { it.id == playerCard.id }
+        } ?: throw IllegalStateException("No player owns the card being played.")
 
         requireCardPlayable(currentState, player, playerCard, position)
 
