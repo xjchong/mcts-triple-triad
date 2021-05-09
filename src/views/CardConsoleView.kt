@@ -7,9 +7,10 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
     override val transparentChar: Char = '#'
     override val backgroundColor: ANSIColor?
         get() = {
-            when (playerCard?.playerId) {
-                0 -> ANSIColor.BG_MAGENTA
-                1 -> ANSIColor.BG_RED
+            when {
+                playerCard?.isPlayable == false -> ANSIColor.BG_WHITE
+                playerCard?.playerId == 0 -> ANSIColor.BG_MAGENTA
+                playerCard?.playerId == 1 -> ANSIColor.BG_RED
                 else -> null
             }
         }()
@@ -21,16 +22,13 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
         return if (playerCard == null || card == null) {
             "".padEnd(height * width, transparentChar)
         } else {
-            // These 'r'ow and 'c'olumn variables are used for toggling the characters that indicate playability.
-            val r = if (playerCard.isPlayable) '_' else ' '
-            val c = if (playerCard.isPlayable) '|' else ' '
-            "${if (playerCard.isPlayable) '.' else ' '}$r$r$r$r$r$r$r${if (playerCard.isPlayable) '.' else ' '}" +
-            "$c${stars(card)} ${type(card)}$c" +
-            "$c${if (playerCard.isHidden) "(" else " "}${card.name.take(5).padEnd(5)}${if (playerCard.isHidden) ")" else " "}$c"  +
-            "$c       $c" +
-            "$c   ${playerCard.n()}   $c" +
-            "$c  ${playerCard.w()} ${playerCard.e()}  $c" +
-            "$c$r$r$r${playerCard.s()}$r$r$r$c"
+            "._______." +
+            "|${stars(card)} ${type(card)}|" +
+            "|${if (playerCard.isHidden) "(" else " "}${card.name.take(5).padEnd(5)}${if (playerCard.isHidden) ")" else " "}|"  +
+            "|       |" +
+            "|   ${playerCard.n()}   |" +
+            "|  ${playerCard.w()} ${playerCard.e()}  |" +
+            "|___${playerCard.s()}___|"
         }
     }
 

@@ -1,7 +1,4 @@
-import models.Card
-import models.Order
-import models.Plus
-import models.Same
+import models.*
 import tests.Test
 import tests.TestSame
 import tests.Testing
@@ -24,7 +21,7 @@ fun executePlaygroundTest() {
 }
 
 fun main() {
-    executePlaygroundTest()
-//    Testing.execute(TestSame, true)
+//    executePlaygroundTest()
+    Testing.execute(TestSameCombo, true)
 //    Testing.executeUnitTests()
 }
