@@ -144,8 +144,9 @@ class GameStateMachine {
                    comboPositions.add(positionOfSame)
                 }
 
-                nextBoard = board.flipped(positionOfSame, placedCard.playerId)
+                nextBoard = nextBoard.flipped(positionOfSame, placedCard.playerId)
             }
+
 
             resolveCombo(comboPositions, nextBoard, advancedRules)
         } else board
