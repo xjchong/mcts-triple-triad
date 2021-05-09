@@ -1,10 +1,7 @@
 package ai
 
 import GameStateMachine
-import models.Card
-import models.GameState
-import models.Move
-import models.Position
+import models.*
 import kotlin.math.ln
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
@@ -41,7 +38,7 @@ class GameStateMCTSNode(private val rootState: GameState, val moves: List<Move> 
     override val children: List<MCTSNode> by lazy {
         // The number of cards left can be calculated by the number of moves played in conjunction with the root state.
         val rootCardsCount = rootState.players.flatMap { it.cards }.size
-        val cardsCount = ((rootCardsCount - moves.size) / 2.0).roundToInt()
+        var cardsCount = ((rootCardsCount - moves.size) / 2.0).roundToInt()
         val possibleChildren = mutableListOf<GameStateMCTSNode>()
         val rootOccupiedPositions = rootState.board.playerCards.filter { it.value != null }.keys
         val moveOccupiedPositions = moves.map { it.position }
@@ -51,6 +48,10 @@ class GameStateMCTSNode(private val rootState: GameState, val moves: List<Move> 
             Position.BOTTOM_LEFT, Position.BOTTOM, Position.BOTTOM_RIGHT
         ).filter { position ->
             position !in moveOccupiedPositions && position !in rootOccupiedPositions
+        }
+
+        if (rootState.advancedRules.contains(Order)) {
+            cardsCount = 1
         }
 
         for (cardIndex in (0 until cardsCount)) {
@@ -98,7 +99,7 @@ class GameStateMCTSNode(private val rootState: GameState, val moves: List<Move> 
         return rootState.copy(players = rootState.players.map { player ->
             player.withCards(player.cards.map { playerCard ->
                 if (playerCard.card == Card.UNKNOWN) {
-                    playerCard.copy(card = Card.Adamantoise)
+                    playerCard.copy(card = Card.Alpha)
                 } else playerCard
             })
         })

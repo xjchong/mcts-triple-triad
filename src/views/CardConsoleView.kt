@@ -22,13 +22,14 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
         return if (playerCard == null || card == null) {
             "".padEnd(height * width, transparentChar)
         } else {
+            val isUnknown = card == Card.UNKNOWN
             "._______." +
             "|${stars(card)} ${type(card)}|" +
-            "|${if (playerCard.isHidden) "(" else " "}${card.name.take(5).padEnd(5)}${if (playerCard.isHidden) ")" else " "}|"  +
+            "|${if (playerCard.isHidden && !isUnknown) "(" else " "}${card.name.take(5).padEnd(5)}${if (playerCard.isHidden && !isUnknown) ")" else " "}|"  +
             "|       |" +
-            "|   ${playerCard.n()}   |" +
-            "|  ${playerCard.w()} ${playerCard.e()}  |" +
-            "|___${playerCard.s()}___|"
+            "|   ${if (isUnknown) " " else playerCard.n()}   |" +
+            "|  ${if (isUnknown) " " else playerCard.w()} ${if (isUnknown) " " else playerCard.e()}  |" +
+            "|___${if (isUnknown) " " else playerCard.s()}___|"
         }
     }
 
@@ -41,7 +42,7 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
         var string = ""
 
         if (card.rarity == CardRarity.Unknown) {
-            return "???"
+            return "     "
         }
 
         for (i in (0 until 5)) {
@@ -58,7 +59,7 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
             CardType.Garland -> "G"
             CardType.Primal -> "P"
             CardType.Scions -> "S"
-            CardType.Unknown -> "?"
+            CardType.Unknown -> " "
         }
     }
 

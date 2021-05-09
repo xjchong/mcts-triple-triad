@@ -6,7 +6,7 @@ class Card private constructor(val name: String, val rarity: CardRarity,
 
     companion object {
         val DUD = Card("DUD", CardRarity.Legendary, 1, 1, 1, 1)
-        val UNKNOWN = Card("UNKNOWN", CardRarity.Unknown, 0, 0, 0, 0)
+        val UNKNOWN = Card("     ", CardRarity.Unknown, 0, 0, 0, 0, CardType.Unknown)
 
         val Adamantoise = Card("Adamantoise", CardRarity.Uncommon, 5, 7, 4, 4)
         val Adrammelech = Card("Adrammelech", CardRarity.Rare, 6, 1, 7, 8)

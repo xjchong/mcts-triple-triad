@@ -19,9 +19,9 @@ fun testAi() {
     val gameEngine = GameEngine()
 
     val initialState = gameEngine.startGame(listOf(
-        Player(0, arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender)),
-        Player(1, arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender))),
-        advancedRules = listOf(AllOpen),
+        Player(1, arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender)),
+        Player(0, arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender))),
+        advancedRules = listOf(AllOpen, Plus),
         shouldShufflePlayers = false
     )
 
@@ -41,6 +41,14 @@ fun testAi() {
 
         gameEngine.playMove(move)
         nextState = gameEngine.nextState()
+
+        if (nextState.nextPlayer().id == 1) {
+            gameConsoleView.bind(nextState)
+            gameConsoleView.draw()
+        }
+    }
+
+    if (nextState.isGameOver() && nextState.nextPlayer().id == 0) {
         gameConsoleView.bind(nextState)
         gameConsoleView.draw()
     }
