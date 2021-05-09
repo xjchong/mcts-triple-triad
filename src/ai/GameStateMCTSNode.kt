@@ -3,6 +3,8 @@ package ai
 import GameStateMachine
 import models.*
 import kotlin.math.roundToInt
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 class GameStateMCTSNode(private val rootState: GameState, val moves: List<Move> = listOf(),
                         override val parent: MCTSNode? = null): MCTSNode() {
@@ -10,7 +12,7 @@ class GameStateMCTSNode(private val rootState: GameState, val moves: List<Move> 
     override val children: List<MCTSNode> by lazy {
         // The number of cards left can be calculated by the number of moves played in conjunction with the root state.
         val rootCardsCount = rootState.players.flatMap { it.cards }.size
-        var cardsCount = ((rootCardsCount - moves.size) / 2.0).roundToInt()
+        val cardsCount = ((rootCardsCount - moves.size) / 2.0).roundToInt()
         val possibleChildren = mutableListOf<GameStateMCTSNode>()
         val rootOccupiedPositions = rootState.board.playerCards.filter { it.value != null }.keys
         val moveOccupiedPositions = moves.map { it.position }
@@ -28,17 +30,25 @@ class GameStateMCTSNode(private val rootState: GameState, val moves: List<Move> 
             position !in moveOccupiedPositions && position !in rootOccupiedPositions
         }
 
-        if (rootState.advancedRules.contains(Order)) {
-            cardsCount = 1
+        val cardIndices = when {
+            rootState.advancedRules.contains(Order) -> listOf(0)
+            rootState.advancedRules.contains(Chaos) -> {
+                if (moves.isEmpty()) {
+                    listOf(rootState.nextPlayer().cards.indexOfFirst {
+                        it.isPlayable
+                    })
+                } else {
+                    listOf(Random.nextInt(0 until cardsCount))
+                }
+            }
+            else -> (0 until cardsCount).toList()
         }
 
-        for (cardIndex in (0 until cardsCount)) {
+        for (cardIndex in cardIndices) {
             for (position in remainingPositions) {
                 val nextMoves = moves + listOf(Move(cardIndex, position))
 
-                possibleChildren.add(
-                    GameStateMCTSNode(rootState, nextMoves, this)
-                )
+                possibleChildren.add(GameStateMCTSNode(rootState, nextMoves, this))
             }
         }
 
@@ -80,6 +90,6 @@ class GameStateMCTSNode(private val rootState: GameState, val moves: List<Move> 
                     playerCard.copy(card = Card.Alpha)
                 } else playerCard
             })
-        })
+        }, advancedRules = rootState.advancedRules.filterNot { it == Chaos })
     }
 }

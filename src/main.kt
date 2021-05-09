@@ -21,7 +21,7 @@ fun testAi() {
     val initialState = gameEngine.startGame(listOf(
         Player(1, arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender)),
         Player(0, arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender))),
-        advancedRules = listOf(AllOpen, Plus),
+        advancedRules = listOf(AllOpen, Chaos),
         shouldShufflePlayers = false
     )
 
