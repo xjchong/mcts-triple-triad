@@ -35,6 +35,10 @@ class GameStateMachine {
         return initialGameState
     }
 
+    fun initialize(startState: GameState) {
+        states = listOf(startState)
+    }
+
     @Throws(IllegalStateException::class)
     fun makeMove(playerCardIndex: Int, position: Position): GameState {
         val currentState = states.lastOrNull() ?:
@@ -337,7 +341,7 @@ class GameStateMachine {
             throw IllegalStateException("Card can't be played to a position that doesn't exist.")
 
         if (currentState.board.playerCards[position] != null)
-            throw IllegalStateException("Card can't be played to a position that is occupied.")
+            throw IllegalStateException("Card( $playerCard) can't be played to a position ($position) that is occupied.")
     }
 
     private fun setupAllOpen(gameState: GameState): GameState {

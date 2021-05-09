@@ -1,27 +1,113 @@
+import ai.GameStateMCTSNode
+import ai.MCTS
+import extensions.second
 import models.*
 import tests.Test
 import tests.TestSame
 import tests.Testing
+import views.GameConsoleView
 
 fun executePlaygroundTest() {
     Testing.execute(object : Test(
         arrayOf(Card.AlexanderPrime, Card.Ahriman, Card.DUD, Card.Mandragora, Card.Sabotender),
         arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Adrammelech),
-        Move(0, TOP_LEFT),
-        Move(0, BOTTOM_LEFT),
-        Move(0, TOP),
-        Move(0, BOTTOM_RIGHT),
-        Move(0, RIGHT),
-        Move(0, LEFT),
-        Move(0, CENTER),
-        Move(0, TOP_RIGHT),
-        Move(0, BOTTOM),
-        advancedRules = listOf(Same, Order)
+        advancedRules = listOf(Same, Chaos)
     ) {}, true)
+}
+
+fun testAi() {
+    val gameEngine = GameEngine()
+
+    val initialState = gameEngine.startGame(listOf(
+        Player(0, arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender)),
+        Player(1, arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender))),
+        advancedRules = listOf(AllOpen),
+        shouldShufflePlayers = false
+    )
+
+    val ai = MCTS()
+    val gameConsoleView = GameConsoleView(initialState)
+    var nextState = gameEngine.nextState()
+
+    while (!nextState.isGameOver()) {
+
+        val move = if (nextState.nextPlayer().id == 0) {
+            gameConsoleView.bind(nextState)
+            gameConsoleView.draw()
+            getPlayerMove(nextState)
+        } else {
+            getAiMove(ai, nextState)
+        }
+
+        gameEngine.playMove(move)
+        nextState = gameEngine.nextState()
+        gameConsoleView.bind(nextState)
+        gameConsoleView.draw()
+    }
+}
+
+fun getAiMove(ai: MCTS, gameState: GameState): Move {
+    val bestNode = ai.getBestNode(GameStateMCTSNode(gameState), null, 2000)
+
+    return (bestNode as GameStateMCTSNode).moves.first()
+}
+
+fun getPlayerMove(gameState: GameState): Move {
+    val validPositionStrings = listOf(
+        "topleft", "top", "topright",
+        "left", "center", "right",
+        "bottomleft", "bottom", "bottomright"
+    )
+
+    while (true) {
+        print("What is your move? (card index, position): ")
+        val input = readLine() ?: continue
+        val splitInput = input.toLowerCase().split(" ")
+
+        if (splitInput.size != 2) {
+            println("That's not a valid command!")
+            continue
+        }
+
+        val cardIndex = splitInput.first().toIntOrNull()
+        if (cardIndex == null || cardIndex >= gameState.nextPlayer().cards.size) {
+            println("That's not a valid card index!")
+            continue
+        }
+
+        val positionString = splitInput.second()
+        if (positionString !in validPositionStrings) {
+            println("That's not a valid position!")
+            continue
+        }
+
+        val position = when(positionString) {
+            "topleft" -> Position.TOP_LEFT
+            "top" -> Position.TOP
+            "topright" -> Position.TOP_RIGHT
+            "left" -> Position.LEFT
+            "center" -> Position.CENTER
+            "right" -> Position.RIGHT
+            "bottomleft" -> Position.BOTTOM_LEFT
+            "bottom" -> Position.BOTTOM
+            "bottomright" -> Position.BOTTOM_RIGHT
+            else -> Position.CENTER
+        }
+
+        if (gameState.board.playerCards[position] != null) {
+            println("There's already a card there!")
+            continue
+        }
+
+        return Move(cardIndex, position)
+    }
+
+
 }
 
 fun main() {
 //    executePlaygroundTest()
-    Testing.execute(TestSameCombo, true)
+//    Testing.execute(TestSameCombo, true)
 //    Testing.executeUnitTests()
+    testAi()
 }

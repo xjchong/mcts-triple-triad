@@ -12,7 +12,6 @@ abstract class Test(
 ) {
     val moves: List<Move> = moves.toList()
 
-    data class Move(val playerCardIndex: Int, val position: Position)
 
     companion object {
         val TOP_LEFT = Position(0, 0)

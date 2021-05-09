@@ -1,6 +1,7 @@
 package tests
 
 import models.Card
+import models.Move
 import models.Plus
 
 object TestPlusCombo : Test(

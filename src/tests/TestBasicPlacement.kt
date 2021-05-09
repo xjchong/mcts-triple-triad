@@ -2,6 +2,7 @@ package tests
 
 import models.AllOpen
 import models.Card
+import models.Move
 
 object TestBasicPlacement: Test(
     arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender),

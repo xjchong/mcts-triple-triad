@@ -40,6 +40,10 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
         val rarity = card.rarity.value
         var string = ""
 
+        if (card.rarity == CardRarity.Unknown) {
+            return "???"
+        }
+
         for (i in (0 until 5)) {
             string += if (i < rarity) "*" else " "
         }
@@ -50,10 +54,11 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
     private fun type(card: Card): String {
         return when (card.type) {
             null -> " "
-            Beastman -> "B"
-            Garland -> "G"
-            Primal -> "P"
-            Scions -> "S"
+            CardType.Beastman -> "B"
+            CardType.Garland -> "G"
+            CardType.Primal -> "P"
+            CardType.Scions -> "S"
+            CardType.Unknown -> "?"
         }
     }
 

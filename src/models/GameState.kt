@@ -5,6 +5,10 @@ data class GameState(
     val players: List<Player>, // The order of player implicitly indicates the starting player and turn order.
     val advancedRules: List<AdvancedRule> = listOf()) {
 
+    fun isGameOver(): Boolean {
+        return players.any { it.cards.isEmpty() }
+    }
+
     fun getTurn(): Int {
         // The first turn is 0.
         return board.playerCards.values.sumBy { if (it != null) 1 else 0 }
