@@ -3,7 +3,7 @@ package models
 import java.util.*
 
 data class PlayerCard(val card: Card, val playerId: Int,
-                      val playableTurns: List<Int> = listOf(),
+                      val isPlayable: Boolean = false,
                       val isHidden: Boolean = true, val modifier: Int = 0, val id: UUID = UUID.randomUUID()) {
 
     fun assignedToPlayer(playerId: Int): PlayerCard {
@@ -18,8 +18,12 @@ data class PlayerCard(val card: Card, val playerId: Int,
         return copy(isHidden = false)
     }
 
-    fun playableOnTurns(playableTurns: List<Int>): PlayerCard {
-        return copy(playableTurns = playableTurns)
+    fun playable(): PlayerCard {
+        return copy(isPlayable = true)
+    }
+
+    fun unplayable(): PlayerCard {
+        return copy(isPlayable = false)
     }
 
     fun modified(modifier: Int): PlayerCard {

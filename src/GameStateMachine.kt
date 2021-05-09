@@ -1,4 +1,5 @@
 import models.*
+import kotlin.random.Random
 
 class GameStateMachine {
 
@@ -65,7 +66,7 @@ class GameStateMachine {
             if (it.id == playerAfterMove.id) playerAfterMove else it
         }
 
-        val nextState = currentState.copy(board = nextBoard, players = playersAfterMove)
+        val nextState = resolvePlayability(currentState.copy(board = nextBoard, players = playersAfterMove))
 
         states = states + nextState
 
@@ -96,6 +97,27 @@ class GameStateMachine {
         }
 
         return nextBoard
+    }
+
+    private fun resolvePlayability(gameStateAfterPlace: GameState): GameState {
+        val nextPlayer = gameStateAfterPlace.nextPlayer()
+        val advancedRules = gameStateAfterPlace.advancedRules
+        val playableIndices = when {
+            advancedRules.contains(Chaos) -> listOf(Random.nextInt(0, nextPlayer.cards.size))
+            advancedRules.contains(Order) -> listOf(0)
+            else -> nextPlayer.cards.indices
+        }
+
+        return gameStateAfterPlace.copy(players = gameStateAfterPlace.players.map { player ->
+            if (player == nextPlayer) {
+                player.withCards(player.cards.mapIndexed { cardIndex, card ->
+                    if (cardIndex in playableIndices) card.playable() else card.unplayable()
+                })
+            } else {
+                player.withCards(player.cards.map { it.unplayable() })
+            }
+        })
+
     }
 
     private fun resolvePlacedCardBasic(board: Board, position: Position): Board {
@@ -308,9 +330,8 @@ class GameStateMachine {
         if (!player.cards.contains(playerCard))
             throw IllegalStateException("Card not playable due to the player not owning that card.")
 
-        val currentTurn = currentState.getTurn()
-        if (!playerCard.playableTurns.contains(currentTurn))
-            throw IllegalStateException("Card not playable (${playerCard.playableTurns}) on this turn ($currentTurn)")
+        if (!playerCard.isPlayable)
+            throw IllegalStateException("Card not playable on this turn.")
 
         if (!currentState.board.playerCards.containsKey(position))
             throw IllegalStateException("Card can't be played to a position that doesn't exist.")
@@ -339,26 +360,36 @@ class GameStateMachine {
 
     private fun setupOrder(gameState: GameState): GameState {
         return gameState.copy(players = gameState.players.mapIndexed { playerIndex, player ->
-            player.withCards(player.cards.mapIndexed { cardIndex, playerCard ->
-                playerCard.playableOnTurns(listOf(playerIndex + cardIndex))
-            })
+            if (playerIndex == 0) {
+                player.withCards(player.cards.mapIndexed { cardIndex, card ->
+                    if (cardIndex == 0) card.playable() else card.unplayable()
+                })
+            } else {
+                player.withCards(player.cards.map { it.unplayable() })
+            }
         })
     }
 
     private fun setupChaos(gameState: GameState): GameState {
         return gameState.copy(players = gameState.players.mapIndexed { playerIndex, player ->
-            val playableTurnIndices = mutableListOf<Int>(0, 1, 2, 3, 4).shuffled()
-            player.withCards(player.cards.mapIndexed { cardIndex, playerCard ->
-                playerCard.playableOnTurns(listOf(playerIndex + playableTurnIndices[cardIndex]))
-            })
+            if (playerIndex == 0) {
+                val randomCardIndex = Random.nextInt(0, player.cards.size)
+                player.withCards(player.cards.mapIndexed { cardIndex, card ->
+                    if (cardIndex == randomCardIndex) card.playable() else card.unplayable()
+                })
+            } else {
+                player.withCards(player.cards.map { it.unplayable() })
+            }
         })
     }
 
     private fun setupFreePlay(gameState: GameState): GameState {
-        return gameState.copy(players = gameState.players.map { player ->
-            player.withCards(player.cards.map { it.playableOnTurns(listOf(
-                0, 1, 2, 3, 4, 5, 6, 7, 8
-            ))})
+        return gameState.copy(players = gameState.players.mapIndexed { playerIndex, player ->
+            if (playerIndex == 0) {
+                player.withCards(player.cards.map { it.playable() })
+            } else {
+                player.withCards(player.cards.map { it.unplayable() })
+            }
         })
     }
 

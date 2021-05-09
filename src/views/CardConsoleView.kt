@@ -21,13 +21,16 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
         return if (playerCard == null || card == null) {
             "".padEnd(height * width, transparentChar)
         } else {
-            "._______." +
-            "|${stars(card)} ${type(card)}|" +
-            "|${if (playerCard.isHidden) "(" else " "}${card.name.take(5).padEnd(5)}${if (playerCard.isHidden) ")" else " "}|"  +
-            "|       |" +
-            "|   ${playerCard.n()}   |" +
-            "|  ${playerCard.w()} ${playerCard.e()}  |" +
-            "|___${playerCard.s()}___|"
+            // These 'r'ow and 'c'olumn variables are used for toggling the characters that indicate playability.
+            val r = if (playerCard.isPlayable) '_' else ' '
+            val c = if (playerCard.isPlayable) '|' else ' '
+            "${if (playerCard.isPlayable) '.' else ' '}$r$r$r$r$r$r$r${if (playerCard.isPlayable) '.' else ' '}" +
+            "$c${stars(card)} ${type(card)}$c" +
+            "$c${if (playerCard.isHidden) "(" else " "}${card.name.take(5).padEnd(5)}${if (playerCard.isHidden) ")" else " "}$c"  +
+            "$c       $c" +
+            "$c   ${playerCard.n()}   $c" +
+            "$c  ${playerCard.w()} ${playerCard.e()}  $c" +
+            "$c$r$r$r${playerCard.s()}$r$r$r$c"
         }
     }
 
