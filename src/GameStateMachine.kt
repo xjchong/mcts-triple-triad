@@ -6,37 +6,8 @@ class GameStateMachine {
     var states: List<GameState> = listOf()
         private set
 
-    fun initialize(players: List<Player>, advancedRules: List<AdvancedRule> = listOf(),
-                   shouldShufflePlayers: Boolean = true): GameState {
-        val startingPlayers = if (shouldShufflePlayers) players.shuffled() else players
-        var initialGameState = GameState(Board.standardInstance(), startingPlayers, advancedRules)
-
-        // Setup the advanced rules.
-        if (advancedRules.contains(AllOpen)) {
-            initialGameState = setupAllOpen(initialGameState)
-        } else if (advancedRules.contains(ThreeOpen)) {
-            initialGameState = setupThreeOpen(initialGameState)
-        }
-
-        if (advancedRules.contains(Swap)) {
-            initialGameState = setupSwap(initialGameState)
-        }
-
-        if (advancedRules.contains(Chaos)) {
-            initialGameState = setupChaos(initialGameState)
-        } else if (advancedRules.contains(Order)) {
-            initialGameState = setupOrder(initialGameState)
-        } else {
-            initialGameState = setupFreePlay(initialGameState)
-        }
-
-        states = listOf(initialGameState)
-
-        return initialGameState
-    }
-
-    fun initialize(startState: GameState) {
-        states = listOf(startState)
+    fun setState(gameState: GameState) {
+        states = listOf(gameState)
     }
 
     @Throws(IllegalStateException::class)
@@ -75,6 +46,25 @@ class GameStateMachine {
         states = states + nextState
 
         return nextState
+    }
+
+    @Throws(IllegalStateException::class)
+    private fun requireCardPlayable(currentState: GameState, player: Player, playerCard: PlayerCard,
+                                    position: Position) {
+        if (currentState.nextPlayer() != player)
+            throw IllegalStateException("Card not playable due to not being this player's turn.")
+
+        if (!player.cards.contains(playerCard))
+            throw IllegalStateException("Card not playable due to the player not owning that card.")
+
+        if (!playerCard.isPlayable)
+            throw IllegalStateException("Card not playable on this turn.")
+
+        if (!currentState.board.playerCards.containsKey(position))
+            throw IllegalStateException("Card can't be played to a position that doesn't exist.")
+
+        if (currentState.board.playerCards[position] != null)
+            throw IllegalStateException("Card( $playerCard) can't be played to a position ($position) that is occupied.")
     }
 
     @Throws(IllegalStateException::class)
@@ -323,82 +313,6 @@ class GameStateMachine {
         }.keys.toList()
 
         return resolveCombo(newlyFlippedPositions, nextBoard, advancedRules)
-    }
-
-    @Throws(IllegalStateException::class)
-    private fun requireCardPlayable(currentState: GameState, player: Player, playerCard: PlayerCard,
-                                    position: Position) {
-        if (currentState.nextPlayer() != player)
-            throw IllegalStateException("Card not playable due to not being this player's turn.")
-
-        if (!player.cards.contains(playerCard))
-            throw IllegalStateException("Card not playable due to the player not owning that card.")
-
-        if (!playerCard.isPlayable)
-            throw IllegalStateException("Card not playable on this turn.")
-
-        if (!currentState.board.playerCards.containsKey(position))
-            throw IllegalStateException("Card can't be played to a position that doesn't exist.")
-
-        if (currentState.board.playerCards[position] != null)
-            throw IllegalStateException("Card( $playerCard) can't be played to a position ($position) that is occupied.")
-    }
-
-    private fun setupAllOpen(gameState: GameState): GameState {
-        return gameState.copy(players = gameState.players.map { player ->
-            player.withCards(player.cards.map {
-                it.unhidden()
-            })
-        })
-    }
-
-    private fun setupThreeOpen(gameState: GameState): GameState {
-        return gameState.copy(players = gameState.players.map { player ->
-            val indicesToOpen = listOf(0, 1, 2, 3, 4).shuffled().take(3)
-
-            player.withCards(player.cards.mapIndexed { index, playerCard ->
-                if (index in indicesToOpen) playerCard.unhidden() else playerCard.hidden()
-            })
-        })
-    }
-
-    private fun setupOrder(gameState: GameState): GameState {
-        return gameState.copy(players = gameState.players.mapIndexed { playerIndex, player ->
-            if (playerIndex == 0) {
-                player.withCards(player.cards.mapIndexed { cardIndex, card ->
-                    if (cardIndex == 0) card.playable() else card.unplayable()
-                })
-            } else {
-                player.withCards(player.cards.map { it.unplayable() })
-            }
-        })
-    }
-
-    private fun setupChaos(gameState: GameState): GameState {
-        return gameState.copy(players = gameState.players.mapIndexed { playerIndex, player ->
-            if (playerIndex == 0) {
-                val randomCardIndex = Random.nextInt(0, player.cards.size)
-                player.withCards(player.cards.mapIndexed { cardIndex, card ->
-                    if (cardIndex == randomCardIndex) card.playable() else card.unplayable()
-                })
-            } else {
-                player.withCards(player.cards.map { it.unplayable() })
-            }
-        })
-    }
-
-    private fun setupFreePlay(gameState: GameState): GameState {
-        return gameState.copy(players = gameState.players.mapIndexed { playerIndex, player ->
-            if (playerIndex == 0) {
-                player.withCards(player.cards.map { it.playable() })
-            } else {
-                player.withCards(player.cards.map { it.unplayable() })
-            }
-        })
-    }
-
-    private fun setupSwap(gameState: GameState): GameState {
-        return gameState
     }
 
     inner class IllegalStateException(message: String) : Exception(message)

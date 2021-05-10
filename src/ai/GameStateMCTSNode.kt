@@ -58,7 +58,7 @@ class GameStateMCTSNode(private val rootState: GameState, val moves: List<Move> 
     override val stateValue: Double
         get() = {
             val gameStateMachine = GameStateMachine().also {
-                it.initialize(getPossibleInitialState())
+                it.setState(getPossibleInitialState())
             }
 
             moves.forEach {

@@ -1,5 +1,6 @@
 package tests
 
+import GameEngine
 import GameStateMachine
 import models.*
 import views.GameConsoleView
@@ -13,7 +14,8 @@ object Testing {
         }
 
         val states = GameStateMachine().apply {
-            initialize(players, test.advancedRules, shouldShufflePlayers = false)
+            val initialState = GameEngine().startGame(players, test.advancedRules, shouldShufflePlayers = false)
+            setState(initialState)
             test.moves.forEach { (cardIndex, position) ->
                 makeMove(cardIndex, position)
             }
