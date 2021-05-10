@@ -70,8 +70,8 @@ class GameStateMCTSNode(private val rootState: GameState, val moves: List<Move> 
             val endStateScore = endState.score()
 
             when(playerId) {
-                1 -> if (endStateScore == 0) 1.0 else 0.0
-                else -> if (endStateScore == 0) 1.0 else 0.0
+                1 -> if (endStateScore > 0) 1.0 else 0.0
+                else -> if (endStateScore < 0) 1.0 else 0.0
             }
         }()
 
