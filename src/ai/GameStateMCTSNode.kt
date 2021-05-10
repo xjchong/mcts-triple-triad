@@ -67,10 +67,12 @@ class GameStateMCTSNode(private val rootState: GameState, val moves: List<Move> 
 
             val endState = gameStateMachine.states.last()
             val playerId = rootState.nextPlayer().id
-            val boardPoints = endState.board.playerCards.values.filter { it?.playerId == playerId }.size
-            val handPoints = endState.players.flatMap { it.cards }.filter { it.playerId == playerId }.size
+            val endStateScore = endState.score()
 
-            if (boardPoints + handPoints > 5) 1.0 else 0.0
+            when(playerId) {
+                1 -> if (endStateScore == 0) 1.0 else 0.0
+                else -> if (endStateScore == 0) 1.0 else 0.0
+            }
         }()
 
     override fun rollout(): Double {

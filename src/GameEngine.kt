@@ -43,6 +43,12 @@ class GameEngine {
             println("Game is over!")
         } else {
             stateMachine.makeMove(move.playerCardIndex, move.position)
+
+            with(stateMachine.states.last()) {
+                if (isGameOver() && score() == 0 && advancedRules.contains(SuddenDeath)) {
+                    stateMachine.setState(setupSuddenDeath(this))
+                }
+            }
         }
 
         return nextState()
@@ -60,7 +66,14 @@ class GameEngine {
                 })
             }
         })
+    }
 
+    private fun setupSuddenDeath(gameState: GameState): GameState {
+        val allCards = gameState.players.flatMap { it.cards } + gameState.board.playerCards.mapNotNull { it.value }
+
+        return GameState(Board.standardInstance(), players = gameState.players.map { player ->
+            player.withCards(allCards.filter { it.playerId == player.id }.take(5))
+        }.reversed(), advancedRules = gameState.advancedRules)
     }
 
     private fun setupAllOpen(gameState: GameState): GameState {
