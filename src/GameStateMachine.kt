@@ -41,7 +41,13 @@ class GameStateMachine {
             if (it.id == playerAfterMove.id) playerAfterMove else it
         }
 
-        val nextState = resolvePlayability(currentState.copy(board = nextBoard, players = playersAfterMove))
+        var nextState = currentState.copy(board = nextBoard, players = playersAfterMove).movePlayed()
+
+        if (nextState.advancedRules.contains(SuddenDeath)) {
+            nextState = resolveSuddenDeath(nextState)
+        }
+
+        nextState = resolvePlayability(nextState)
 
         states = states + nextState
 
@@ -288,7 +294,7 @@ class GameStateMachine {
             nextBoard = nextBoard.setCard(playerCard.modified(modifier), position) ?: nextBoard
         }
 
-        return GameState(nextBoard, nextPlayers, gameState.advancedRules)
+        return gameState.copy(board = nextBoard, players = nextPlayers)
     }
 
     private fun resolveCombo(positions: List<Position>, board: Board, advancedRules: List<AdvancedRule>): Board {
@@ -313,6 +319,17 @@ class GameStateMachine {
         }.keys.toList()
 
         return resolveCombo(newlyFlippedPositions, nextBoard, advancedRules)
+    }
+
+    private fun resolveSuddenDeath(gameState: GameState): GameState {
+        // After 5 draws, sudden death ends (with a draw). Each game is 9 turns long.
+        if (!gameState.isGameOver() || gameState.score() != 0 || gameState.movesPlayed >= (9 * 5)) return gameState
+
+        val allCards = gameState.players.flatMap { it.cards } + gameState.board.playerCards.mapNotNull { it.value }
+
+        return gameState.copy(board = Board.standardInstance(), players = gameState.players.map { player ->
+            player.withCards(allCards.map{ it.modified(0) }.filter { it.playerId == player.id }.take(5))
+        }.reversed())
     }
 
     inner class IllegalStateException(message: String) : Exception(message)

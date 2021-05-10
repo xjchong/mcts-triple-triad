@@ -2,7 +2,6 @@ package views
 
 import models.GameState
 import models.Position
-import views.colors.ANSIColor
 
 class GameConsoleView(private val initialGameState: GameState): ConsoleLayout(32, 96) {
 

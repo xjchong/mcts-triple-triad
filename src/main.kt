@@ -19,8 +19,8 @@ fun testAi() {
     val gameEngine = GameEngine()
 
     val initialState = gameEngine.startGame(listOf(
-        Player(1, arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender)),
-        Player(0, arrayOf(Card.Bomb, Card.Coeurl, Card.Dodo, Card.Mandragora, Card.Sabotender))),
+        Player(1, arrayOf(Card.Adrammelech, Card.AlexanderPrime, Card.Dodo, Card.Mandragora, Card.Amaljaa)),
+        Player(0, arrayOf(Card.Adamantoise, Card.Apkallu, Card.Bomb, Card.Coeurl, Card.Sabotender))),
         advancedRules = listOf(AllOpen, SuddenDeath),
         shouldShufflePlayers = false
     )
@@ -30,7 +30,7 @@ fun testAi() {
     var nextState = gameEngine.nextState()
 
     while (!nextState.isGameOver()) {
-
+        println(nextState.movesPlayed)
         val move = if (nextState.nextPlayer().id == 0) {
             gameConsoleView.bind(nextState)
             gameConsoleView.draw()

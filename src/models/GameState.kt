@@ -3,7 +3,8 @@ package models
 data class GameState(
     val board: Board,
     val players: List<Player>, // The order of player implicitly indicates the starting player and turn order.
-    val advancedRules: List<AdvancedRule> = listOf()) {
+    val advancedRules: List<AdvancedRule> = listOf(),
+    val movesPlayed: Int = 0) {
 
     fun isGameOver(): Boolean {
         return players.any { it.cards.isEmpty() }
@@ -36,5 +37,9 @@ data class GameState(
 
     fun nextPlayer(): Player {
         return players[getTurn() % players.size]
+    }
+
+    fun movePlayed(): GameState {
+        return copy(movesPlayed = movesPlayed + 1)
     }
 }
