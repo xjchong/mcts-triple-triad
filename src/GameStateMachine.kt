@@ -43,12 +43,19 @@ class GameStateMachine {
 
         var nextState = currentState.copy(board = nextBoard, players = playersAfterMove).movePlayed()
 
+        if (nextState.advancedRules.contains(Ascension)) {
+            nextState = resolveAscension(nextState, position)
+        }
+
+        if (nextState.advancedRules.contains(Descension)) {
+            nextState = resolveDescension(nextState, position)
+        }
+
         if (nextState.advancedRules.contains(SuddenDeath)) {
             nextState = resolveSuddenDeath(nextState)
         }
 
         nextState = resolvePlayability(nextState)
-
         states = states + nextState
 
         return nextState
@@ -250,50 +257,34 @@ class GameStateMachine {
         return nextBoard
     }
 
-    private fun resolveAscension(gameState: GameState): GameState {
-        return resolveModifier(gameState, 1)
+    private fun resolveAscension(gameState: GameState, position: Position): GameState {
+        return resolveModifier(gameState, position, 1)
     }
 
-    private fun resolveDescension(gameState: GameState): GameState {
-        return resolveModifier(gameState, -1)
+    private fun resolveDescension(gameState: GameState, position: Position): GameState {
+        return resolveModifier(gameState, position, -1)
     }
 
-    private fun resolveModifier(gameState: GameState, modifierIncrement: Int): GameState {
-        val typeCount = mutableMapOf<CardType, Int>()
-
-        gameState.board.playerCards.values.filterNotNull().mapNotNull { it.card.type }.forEach { type ->
-           typeCount[type] = typeCount.getOrDefault(type, 0) + 1
+    private fun resolveModifier(gameState: GameState, position: Position, modifierIncrement: Int): GameState {
+        val typeToModify = gameState.board.playerCards[position]?.card?.type ?: return gameState
+        val boardCardsWithType = gameState.board.playerCards.filter { (_, boardCard) ->
+            boardCard != null && boardCard.card.type == typeToModify
         }
 
-        var nextState = gameState
-        for ((type, count) in typeCount) {
-            nextState = resolveModifier(nextState, type, count * modifierIncrement)
-        }
-
-        return nextState
-    }
-
-    private fun resolveModifier(gameState: GameState, type: CardType, modifier: Int): GameState {
-        val nextPlayers = gameState.players.map { player ->
-            player.withCards(
-                player.cards.map { playerCard ->
-                    if (playerCard.card.type == type) {
-                        playerCard.modified(modifier)
-                    } else {
-                        playerCard
-                    }
-                }
-            )
-        }
-
+        // Increment cards on the board.
         var nextBoard = gameState.board
+        for ((boardPosition, boardCard) in boardCardsWithType) {
+            if (boardCard == null) continue
 
-        for ((position, playerCard) in gameState.board.playerCards) {
-            if (playerCard == null || playerCard.card.type != type) continue
-
-            nextBoard = nextBoard.setCard(playerCard.modified(modifier), position) ?: nextBoard
+            nextBoard = nextBoard.setCard(boardCard.modified(modifierIncrement), boardPosition) ?: nextBoard
         }
 
+        // Increment cards in player hands.
+        val nextPlayers = gameState.players.map { player ->
+            player.withCards(player.cards.map {
+                if (it.card.type == typeToModify) it.modified(modifierIncrement) else it
+            })
+        }
         return gameState.copy(board = nextBoard, players = nextPlayers)
     }
 
@@ -328,7 +319,7 @@ class GameStateMachine {
         val allCards = gameState.players.flatMap { it.cards } + gameState.board.playerCards.mapNotNull { it.value }
 
         return gameState.copy(board = Board.standardInstance(), players = gameState.players.map { player ->
-            player.withCards(allCards.map{ it.modified(0) }.filter { it.playerId == player.id }.take(5))
+            player.withCards(allCards.map{ it.noModifiers() }.filter { it.playerId == player.id }.take(5))
         }.reversed())
     }
 

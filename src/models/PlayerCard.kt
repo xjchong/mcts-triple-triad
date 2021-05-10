@@ -26,24 +26,28 @@ data class PlayerCard(val card: Card, val playerId: Int,
         return copy(isPlayable = false)
     }
 
-    fun modified(modifier: Int): PlayerCard {
-        return copy(modifier = modifier)
+    fun modified(increment: Int): PlayerCard {
+        return copy(modifier = modifier + increment)
+    }
+
+    fun noModifiers(): PlayerCard {
+        return copy(modifier = 0)
     }
 
     fun n(): Int {
-        return card.n.coerceIn(MIN_VALUE, MAX_VALUE)
+        return (card.n + modifier).coerceIn(MIN_VALUE, MAX_VALUE)
     }
 
     fun e(): Int {
-        return card.e.coerceIn(MIN_VALUE, MAX_VALUE)
+        return (card.e + modifier).coerceIn(MIN_VALUE, MAX_VALUE)
     }
 
     fun s(): Int {
-        return card.s.coerceIn(MIN_VALUE, MAX_VALUE)
+        return (card.s + modifier).coerceIn(MIN_VALUE, MAX_VALUE)
     }
 
     fun w(): Int {
-        return card.w.coerceIn(MIN_VALUE, MAX_VALUE)
+        return (card.w + modifier).coerceIn(MIN_VALUE, MAX_VALUE)
     }
 
     companion object {

@@ -19,9 +19,9 @@ fun testAi() {
     val gameEngine = GameEngine()
 
     gameEngine.startGame(listOf(
-        Player(1, arrayOf(Card.Adrammelech, Card.AlexanderPrime, Card.Dodo, Card.Mandragora, Card.Amaljaa)),
-        Player(0, arrayOf(Card.Adamantoise, Card.Apkallu, Card.Bomb, Card.Coeurl, Card.Sabotender))),
-        advancedRules = listOf(AllOpen, SuddenDeath),
+        Player(1, arrayOf(Card.Ananta, Card.AlexanderPrime, Card.Dodo, Card.Mandragora, Card.Amaljaa)),
+        Player(0, arrayOf(Card.Adamantoise, Card.Ananta, Card.Bomb, Card.Coeurl, Card.Sabotender))),
+        advancedRules = listOf(AllOpen, Descension, SuddenDeath),
         shouldShufflePlayers = false
     )
 
@@ -116,6 +116,6 @@ fun getPlayerMove(gameState: GameState): Move {
 fun main() {
 //    executePlaygroundTest()
 //    Testing.execute(TestSameCombo, true)
-    Testing.executeUnitTests()
-//    testAi()
+//    Testing.executeUnitTests()
+    testAi()
 }

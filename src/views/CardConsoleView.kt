@@ -27,14 +27,22 @@ class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(H
             "|${stars(card)} ${type(card)}|" +
             "|${if (playerCard.isHidden && !isUnknown) "(" else " "}${card.name.take(5).padEnd(5)}${if (playerCard.isHidden && !isUnknown) ")" else " "}|"  +
             "|       |" +
-            "|   ${if (isUnknown) " " else playerCard.n()}   |" +
-            "|  ${if (isUnknown) " " else playerCard.w()} ${if (isUnknown) " " else playerCard.e()}  |" +
-            "|___${if (isUnknown) " " else playerCard.s()}___|"
+            "|   ${if (isUnknown) " " else value(playerCard.n())}   |" +
+            "|  ${if (isUnknown) " " else value(playerCard.w())} ${if (isUnknown) " " else value(playerCard.e())}  |" +
+            "|___${if (isUnknown) " " else value(playerCard.s())}___|"
         }
     }
 
     fun bind(playerCard: PlayerCard?) {
         this.playerCard = playerCard
+    }
+
+    private fun value(number: Int): String {
+        return when {
+            number >= 10 -> "A"
+            number <= 0 -> "1"
+            else -> number.toString()
+        }
     }
 
     private fun stars(card: Card): String {
