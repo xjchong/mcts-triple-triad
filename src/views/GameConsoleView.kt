@@ -3,20 +3,16 @@ package views
 import models.GameState
 import models.Position
 
-class GameConsoleView(private val initialGameState: GameState): ConsoleLayout(32, 96) {
+class GameConsoleView: ConsoleLayout(32, 96) {
 
-    private var currentGameState: GameState = initialGameState
-    private val boardConsoleView = BoardConsoleView(currentGameState.board)
-    private val playerHandViews: List<HandConsoleView>
+    private val boardConsoleView = BoardConsoleView()
+    private val playerHandViews: List<HandConsoleView> = listOf(
+        HandConsoleView(),
+        HandConsoleView()
+    )
 
     init {
         add(boardConsoleView, Position(0, 31))
-
-        playerHandViews = initialGameState.players.sortedBy {
-            it.id
-        }.map {
-            HandConsoleView(it)
-        }
 
         playerHandViews.getOrNull(0)?.run {
             this@GameConsoleView.add(this, HAND_L_POS)
@@ -27,8 +23,6 @@ class GameConsoleView(private val initialGameState: GameState): ConsoleLayout(32
     }
 
     fun bind(gameState: GameState) {
-        currentGameState = gameState
-
         // Bind the board.
         boardConsoleView.bind(gameState.board)
 

@@ -3,11 +3,13 @@ package views
 import models.Board
 import models.Position
 
-class BoardConsoleView(private var board: Board): ConsoleLayout(HEIGHT, WIDTH) {
+class BoardConsoleView: ConsoleLayout(HEIGHT, WIDTH) {
 
     private val cardViews: Map<Position, CardConsoleView>
 
     init {
+        val board = Board.standardInstance()
+
         add(BoardFrameConsoleView(), Position(0, 0))
 
         cardViews = board.playerCards.keys.associateWith { CardConsoleView(board.playerCards[it]) }
@@ -21,14 +23,12 @@ class BoardConsoleView(private var board: Board): ConsoleLayout(HEIGHT, WIDTH) {
     }
 
     fun bind(board: Board) {
-        this.board = board
-
         cardViews.forEach { (position, cardView) ->
             cardView.bind(board.playerCards[position])
         }
     }
 
-    inner class BoardFrameConsoleView(): ConsoleView(HEIGHT, WIDTH) {
+    inner class BoardFrameConsoleView : ConsoleView(HEIGHT, WIDTH) {
         override fun getString(): String {
             return BOARD_STRING
         }

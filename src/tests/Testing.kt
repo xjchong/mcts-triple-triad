@@ -22,7 +22,7 @@ object Testing {
         }.states
 
         if (shouldDraw) {
-            GameConsoleView(states.first()).also { gameConsoleView ->
+            GameConsoleView().also { gameConsoleView ->
                 states.forEach { state ->
                     gameConsoleView.bind(state)
                     gameConsoleView.draw()

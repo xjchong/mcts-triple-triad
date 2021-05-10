@@ -18,7 +18,7 @@ fun executePlaygroundTest() {
 fun testAi() {
     val gameEngine = GameEngine()
 
-    val initialState = gameEngine.startGame(listOf(
+    gameEngine.startGame(listOf(
         Player(1, arrayOf(Card.Adrammelech, Card.AlexanderPrime, Card.Dodo, Card.Mandragora, Card.Amaljaa)),
         Player(0, arrayOf(Card.Adamantoise, Card.Apkallu, Card.Bomb, Card.Coeurl, Card.Sabotender))),
         advancedRules = listOf(AllOpen, SuddenDeath),
@@ -26,15 +26,15 @@ fun testAi() {
     )
 
     val ai = MCTS()
-    val gameConsoleView = GameConsoleView(initialState)
+    val gameConsoleView = GameConsoleView()
     var nextState = gameEngine.nextState()
 
     while (!nextState.isGameOver()) {
-        println(nextState.movesPlayed)
         val move = if (nextState.nextPlayer().id == 0) {
             gameConsoleView.bind(nextState)
             gameConsoleView.draw()
-            getPlayerMove(nextState)
+            getAiMove(ai, nextState)
+//            getPlayerMove(nextState)
         } else {
             getAiMove(ai, nextState)
         }
@@ -116,6 +116,6 @@ fun getPlayerMove(gameState: GameState): Move {
 fun main() {
 //    executePlaygroundTest()
 //    Testing.execute(TestSameCombo, true)
-//    Testing.executeUnitTests()
-    testAi()
+    Testing.executeUnitTests()
+//    testAi()
 }

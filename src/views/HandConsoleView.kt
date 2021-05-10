@@ -3,15 +3,15 @@ package views
 import models.Player
 import models.Position
 
-class HandConsoleView(private val initialPlayer: Player): ConsoleLayout(15, 29) {
+class HandConsoleView: ConsoleLayout(15, 29) {
 
-    private var currentPlayer: Player = initialPlayer
-    private val cardViews = listOf(
-        CardConsoleView(currentPlayer.cards.getOrNull(0)),
-        CardConsoleView(currentPlayer.cards.getOrNull(1)),
-        CardConsoleView(currentPlayer.cards.getOrNull(2)),
-        CardConsoleView(currentPlayer.cards.getOrNull(3)),
-        CardConsoleView(currentPlayer.cards.getOrNull(4))
+    private var initialPlayer: Player? = null
+    private val cardViews= listOf(
+        CardConsoleView(null),
+        CardConsoleView(null),
+        CardConsoleView(null),
+        CardConsoleView(null),
+        CardConsoleView(null)
     )
 
     init {
@@ -23,10 +23,16 @@ class HandConsoleView(private val initialPlayer: Player): ConsoleLayout(15, 29) 
     }
 
     fun bind(player: Player) {
-        for ((index, initialCard) in initialPlayer.cards.withIndex()) {
-            val currentCard = player.cards.find { it.id == initialCard.id }
+        if (player.cards.size == 5 || initialPlayer == null) {
+            initialPlayer = player
+        }
 
-            cardViews[index].bind(currentCard)
+        initialPlayer?.let {
+            for ((index, initialCard) in it.cards.withIndex()) {
+                val currentCard = player.cards.find { card -> card.id == initialCard.id }
+
+                cardViews[index].bind(currentCard)
+            }
         }
     }
 }
