@@ -6,14 +6,12 @@ import views.colors.ANSIColor
 class CardConsoleView(private var playerCard: PlayerCard? = null): ConsoleView(HEIGHT, WIDTH) {
     override val transparentChar: Char = '#'
     override val backgroundColor: ANSIColor?
-        get() = {
-            when {
-                playerCard?.isPlayable == false -> ANSIColor.BG_WHITE
-                playerCard?.playerId == 0 -> ANSIColor.BG_MAGENTA
-                playerCard?.playerId == 1 -> ANSIColor.BG_RED
-                else -> null
-            }
-        }()
+        get() = when {
+            playerCard?.isPlayable == false -> ANSIColor.BG_WHITE
+            playerCard?.playerId == 0 -> ANSIColor.BG_MAGENTA
+            playerCard?.playerId == 1 -> ANSIColor.BG_RED
+            else -> null
+        }
 
     override fun getString(): String {
         val playerCard = this.playerCard

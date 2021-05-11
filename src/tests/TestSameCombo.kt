@@ -1,6 +1,8 @@
-package models
+package tests
 
-import tests.Test
+import models.Card
+import models.Move
+import models.Same
 
 object TestSameCombo: Test(
     arrayOf(Card.AlexanderPrime, Card.Ahriman, Card.DUD, Card.Mandragora, Card.Sabotender),
